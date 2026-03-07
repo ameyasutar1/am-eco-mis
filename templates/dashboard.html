@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="/static/style.css">
+<script src="/static/app.js"></script>
+</head>
+
+<body onload="loadGrid()">
+
+<!-- LOGO -->
+<img src="/static/img.png" class="logo">
+
+<!-- TOP BAR -->
+<div class="top-bar">
+
+    <!-- SEARCH -->
+    <div class="search-box">
+        <input id="search" placeholder="Search location / item">
+        <span onclick="doSearch()">🔍</span>
+    </div>
+
+    <!-- RIGHT CONTROLS -->
+    <div class="right-controls">
+
+        <!-- LOGOUT -->
+        <button class="logout-btn" onclick="logout()">LOGOUT</button>
+
+        <!-- PAGINATION -->
+        <div class="page-nav">
+            <span>Page</span>
+            <b id="row">1</b>
+
+            <div class="nav-btns">
+                <button onclick="prev()">⬅</button>
+                <button onclick="next()">➡</button>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- GRID AREA -->
+<div class="main">
+
+    <div class="rack">
+        <h3>Left Side</h3>
+        <div id="left" class="seat-grid"></div>
+    </div>
+
+    <div class="rack">
+        <h3>Right Side</h3>
+        <div id="right" class="seat-grid"></div>
+    </div>
+
+</div>
+
+<!-- OPERATION PANEL -->
+<div class="operation">
+
+    <h3>OPERATION</h3>
+    <div id="sel">Select a location</div>
+
+    <div class="form">
+        <input id="item" placeholder="Item ID">
+        <input id="desc" placeholder="Description">
+    </div>
+
+    <button class="btn green" onclick="inward()">RUN INWARD</button>
+    <button class="btn red" onclick="outward()">RUN OUTWARD</button>
+
+</div>
+
+</body>
+</html>

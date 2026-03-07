@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+<!-- LOGO -->
+<img src="/static/img.png" class="logo">
+
+<div class="login-container">
+
+    <h2>ASRS CONTROL SYSTEM</h2>
+    <p class="sub">Secure Operator Login</p>
+
+    <form method="post" action="/login">
+        <input name="user" placeholder="Username" required>
+        <input name="pwd" type="password" placeholder="Password" required>
+        <button class="btn-primary">LOGIN</button>
+    </form>
+
+    <div class="links">
+        <a href="/register">Create new account</a>
+        <a href="/forgot">Forgot password?</a>
+    </div>
+
+</div>
+
+</body>
+</html>
