@@ -1,137 +1,175 @@
-# ASRS Control System - Customer Operations Manual
+# ASRS System - Customer User Manual
 
-## 1. Purpose
-This system is a web-based control interface for an **Automated Storage and Retrieval System (ASRS)**.
-It allows operators to:
-- Log in securely
-- View live tray/location status
-- Run inward (store) and outward (issue) cycles
-- Search inventory
-- Monitor PLC connectivity
-- View analytics and download PDF reports
+This document is for customer teams who will **use, supervise, and maintain** the ASRS software.
+It explains the system in simple terms and gives clear operating steps.
 
-This manual is written for end customers, operators, supervisors, and maintenance teams.
+## 1. What This System Does
+This ASRS software is used to:
+- Store material in trays (**Inward**) 
+- Issue material from trays (**Outward**)
+- Show tray status live on screen
+- Track operation history
+- Generate management reports (PDF)
 
----
-
-## 2. System Overview
-
-### 2.1 Core Components
-- **Web UI (Browser)**: operator dashboard and reports
-- **Backend API (FastAPI)**: business logic, PLC cycle orchestration, reporting
-- **Database (SQLite)**: users, storage status, and movement history
-- **PLC Integration (Snap7)**: actual machine communication for inward/outward cycles
-
-### 2.2 Main Modules
-- `main.py`: application routes, APIs, operation workflow, reports APIs
-- `db.py`: database schema and queries
-- `test.py`: PLC communication and cycle logic
-- `reports_pdf.py`: PDF generation engine
-- `templates/`: HTML pages
-- `static/`: JS/CSS assets
+In short: this is the digital control panel for your ASRS machine.
 
 ---
 
-## 3. Supported Functionalities
+## 2. Main Screens
 
-### 3.1 Authentication
-- Login
-- Register user
-- Reset password
-- Logout
+### 2.1 Login Screen
+- User enters username and password
+- Options: Register, Forgot Password
 
-### 3.2 Storage Operations
-- View all locations (LEFT/RIGHT rack sides)
-- Select location and run:
-  - **INWARD** (store item)
-  - **OUTWARD** (issue item)
-- Location occupancy protection:
-  - Inward blocked for filled trays
-  - Outward blocked for empty trays
+### 2.2 Dashboard Screen
+Main operator screen with:
+- Left and Right storage grids (tray locations)
+- Search box (location/item)
+- PLC connection status (ONLINE/OFFLINE)
+- Inward/Outward operation panel
+- Quick material buttons: Type A, Type B, Type C
+- Reports button
 
-### 3.3 Material Entry Modes (Inward)
-Operator can run inward using either:
-1. Manual `Item ID + Description`
-2. Quick material buttons: `Type A`, `Type B`, `Type C`
-
-When Type A/B/C is clicked, the UI auto-fills:
-- Item ID: UUID
-- Description: predefined type description
-
-### 3.4 Live Behavior
-- Grid auto-refresh
-- Operation status polling
-- PLC connectivity polling (`ONLINE/OFFLINE`)
-- Buttons auto-disable when PLC is offline or operation is running
-
-### 3.5 Reports and Analytics
-Reports page includes:
-- Summary KPI cards
-- Charts (quick-glance analytics)
-- PDF download for:
-  1. Full inventory report
-  2. Item-wise report
-  3. Location-wise report
-  4. User-wise report
-  5. Storing history report
-  6. Issuing report
-  7. Tray status report
+### 2.3 Reports Screen
+Used by supervisor/admin for:
+- KPI summary cards
+- Charts (quick data view)
+- Downloading PDF reports
 
 ---
 
-## 4. Prerequisites
-
-## 4.1 Software
-- Python 3.10+ (recommended 3.12+)
-- Browser: Chrome recommended
-- OS: Windows preferred for production operator station
-
-### 4.2 Network/PLC
-- PLC reachable from host machine
-- Default PLC config in code:
-  - IP: `192.168.2.50`
-  - Port: `102`
-  - Rack: `0`
-  - Slot: `1`
-
-### 4.3 Python Packages
-From `req.txt`:
-- fastapi
-- uvicorn
-- jinja2
-- python-multipart
-- itsdangerous
-
-Install with:
-```bash
-pip install -r req.txt
-```
+## 3. Color Meaning on Dashboard
+- **Green tray** = Empty tray
+- **Red tray** = Filled tray
+- **Yellow tray** = Selected tray
+- **PLC ONLINE** = machine communication available
+- **PLC OFFLINE** = machine not reachable, operations blocked for safety
 
 ---
 
-## 5. Installation and First Run
+## 4. Daily Operation Steps
 
-1. Copy project folder to target machine.
-2. Create and activate virtual environment.
-3. Install dependencies.
-4. Start backend:
-```bash
-python main.py
-```
-5. Open:
-- `http://localhost:8000/`
+## 4.1 Login
+1. Open system URL: `http://localhost:8000/`
+2. Enter credentials
+3. Go to dashboard
 
-Default seeded credentials:
-- Username: `admin`
-- Password: `admin`
+### 4.2 Inward (Store Material)
+1. Click an **empty** tray location
+2. Choose one method:
+   - Enter `Item ID + Description` manually, or
+   - Click Type A / Type B / Type C (auto-fills fields)
+3. Click `RUN INWARD`
+4. Wait for completion message
+5. Confirm tray changes to red (filled)
 
-Change credentials immediately after first login.
+### 4.3 Outward (Issue Material)
+1. Click a **filled** tray location
+2. Click `RUN OUTWARD`
+3. Wait for completion message
+4. Confirm tray changes to green (empty)
+
+### 4.4 Search
+- Enter location number or item keyword in search box
+- System jumps to matching location
 
 ---
 
-## 6. Windows Desktop Shortcut (Operator Friendly)
+## 5. Smart Safety Checks in Software
+The system automatically prevents wrong operations:
+- Inward is blocked on already filled location
+- Outward is blocked on empty location
+- If one cycle is running, second cycle is blocked
+- If PLC is offline, operation buttons are disabled
 
-Create `start_asrs.bat` in project folder:
+---
+
+## 6. Reports Available (PDF)
+1. Full Inventory Report
+2. Item-wise Report
+3. Location-wise Report
+4. User-wise Report
+5. Storing History Report
+6. Issuing Report
+7. Tray Status Report (empty vs filled)
+
+How to use:
+1. Open Reports page
+2. Fill filter field if required (item/location/user)
+3. Click Download PDF
+
+---
+
+## 7. Charts/Analytics on Reports Page
+Reports page gives quick visual understanding:
+- Tray fill ratio
+- Side-wise utilization (LEFT/RIGHT)
+- Material type distribution
+- 7-day inward/outward trend
+
+Use this screen for shift reviews and management checks.
+
+---
+
+## 8. Customer Assumptions
+This system assumes:
+- ASRS PLC network is configured correctly
+- Only one cycle should run at a time
+- Operators are trained for machine safety
+- System is used from authorized PCs
+- Database file is not manually edited/deleted
+
+---
+
+## 9. Caution and Safety Notes
+
+### 9.1 Machine Safety
+- Never run cycle if any person is inside ASRS hazard zone
+- Follow your plant emergency and lockout procedures
+- If PLC fault/emergency appears, stop and call maintenance
+
+### 9.2 Data Safety
+- Take regular backup of `warehouse.db`
+- Do not delete database file
+- Keep system clock correct (reports use timestamp)
+
+### 9.3 Access Safety
+- Change default admin password after deployment
+- Do not share operator credentials
+- Use restricted network where possible
+
+---
+
+## 10. Common Problems and Quick Fix
+
+### Problem: App does not start
+- Check Python path in startup `.bat`
+- Confirm project folder path is correct
+
+### Problem: PLC OFFLINE shown
+- Check PLC power/network cable
+- Check IP, rack, slot, and port config
+- Check firewall/network rules
+
+### Problem: Inward/Outward button not working
+- Operation may already be running
+- PLC may be offline
+- Wrong tray state selected (filled/empty mismatch)
+
+### Problem: UI not updating
+- Hard refresh browser (`Ctrl+F5`)
+- Restart backend process
+
+### Problem: Report is empty
+- No matching data in filter
+- No movement history for selected criteria
+
+---
+
+## 11. Deployment and Start (Windows Shortcut)
+Use a desktop shortcut for easy operator launch.
+
+Example `start_asrs.bat`:
 
 ```bat
 @echo off
@@ -141,161 +179,42 @@ timeout /t 2 /nobreak >nul
 start "" "C:\Program Files\Google\Chrome\Application\chrome.exe" "http://localhost:8000/"
 ```
 
-Then create Desktop shortcut to this `.bat`.
+Then create desktop shortcut of this `.bat`.
 
 ---
 
-## 7. Operator Workflow (Step-by-Step)
-
-## 7.1 Login
-1. Open system URL
-2. Enter username/password
-3. Open dashboard
-
-### 7.2 Inward Cycle (Store)
-1. Select an empty location in grid
-2. Choose one input mode:
-   - Manual item + description, or
-   - Type A/B/C button
-3. Click `RUN INWARD`
-4. Observe operation status message
-5. Wait for completion status
-6. Verify tray turns occupied color
-
-### 7.3 Outward Cycle (Issue)
-1. Select a filled location
-2. Click `RUN OUTWARD`
-3. Wait for completion
-4. Verify location becomes empty
-
-### 7.4 Search
-- Use search box with:
-  - location number, or
-  - item ID/description
-
-### 7.5 Reports
-1. Click `REPORTS` on dashboard
-2. Check summary and charts
-3. Download required PDF report
-4. For item/location/user reports, enter filter and download
+## 12. Recommended Customer SOP (Daily)
+1. Start system
+2. Check PLC status = ONLINE
+3. Run production inward/outward operations
+4. Supervisor checks reports at shift end
+5. Backup database daily
 
 ---
 
-## 8. Color and Status Interpretation
-- **Green tray**: empty/available
-- **Red tray**: occupied
-- **Yellow tray**: currently selected
-- **PLC ONLINE**: PLC reachable
-- **PLC OFFLINE**: PLC not reachable; operation buttons disabled
+## 13. Known Limitations (Current Version)
+- Password storage is basic (not enterprise IAM)
+- Local SQLite database (single machine file)
+- Reports are generated as text-style PDFs
 
 ---
 
-## 9. Report Definitions
-
-1. **Full Inventory**: all locations with side/item/description
-2. **Item-wise**: filtered current stock + related movement history
-3. **Location-wise**: specific tray current state + movement history
-4. **User-wise**: all actions by selected operator
-5. **Storing History**: inward action history
-6. **Issuing Report**: outward action history
-7. **Tray Status**: empty vs filled summary and lists
-
----
-
-## 10. Assumptions
-
-- One ASRS machine is controlled by this instance.
-- Operations are serialized (one cycle at a time).
-- Station IDs for cycles are fixed in code (`1`) unless reconfigured.
-- DB is local SQLite (`warehouse.db`) and machine has disk persistence.
-- User sessions are browser-cookie based.
-- Operators have basic knowledge of ASRS mechanical safety.
+## 14. Support Handover Checklist
+Before final customer handover, confirm:
+- [ ] Login works
+- [ ] Inward/Outward cycle tested
+- [ ] PLC online/offline indication tested
+- [ ] All report downloads tested
+- [ ] Desktop launcher tested
+- [ ] Customer team trained on operation + safety
 
 ---
 
-## 11. Cautions and Safety Notes
+## 15. Contact / Support Process
+If issue occurs:
+1. Capture screenshot
+2. Note time and operator username
+3. Note tray location and action attempted
+4. Share with support/maintenance team
 
-### 11.1 Operational Safety
-- Do not run physical operations without confirming machine is in safe AUTO condition.
-- Ensure no human/manual intervention is inside hazardous ASRS zones during automatic motion.
-- If PLC reports faults/emergency conditions, stop operation and follow site SOP.
-
-### 11.2 Data Integrity
-- Never delete `warehouse.db` in production.
-- Perform periodic backups of DB.
-- Ensure time on host machine is correct; reports rely on timestamps.
-
-### 11.3 Reliability
-- If PLC is unreachable, UI disables operations and reports offline.
-- Long network outages may cause failed cycles in logs.
-- Review failed entries in user/location reports for diagnosis.
-
----
-
-## 12. Troubleshooting Guide
-
-### Issue: Cannot start app (Python not found)
-- Use absolute Python executable path in `.bat`.
-
-### Issue: "PLC OFFLINE"
-- Verify PLC IP/port, network cable, firewall, switch, and rack/slot config.
-
-### Issue: Inward rejected
-- Location may already be occupied.
-- Operation already running.
-- Item/description missing and no type selected.
-
-### Issue: Outward rejected
-- Location already empty.
-- Another cycle is running.
-
-### Issue: Reports have no movement data
-- No completed inward/outward operations logged yet.
-
-### Issue: UI changes not visible
-- Hard refresh browser (`Ctrl + F5` / `Cmd + Shift + R`).
-- Restart backend process.
-
----
-
-## 13. Maintenance Recommendations
-
-- Daily DB backup (`warehouse.db`)
-- Weekly log/report audit
-- Monthly user access review
-- PLC communication health check before shifts
-
----
-
-## 15. Suggested Future Improvements
-
-- Role-based authorization
-- Password hashing + policy enforcement
-- Signed audit trail export (CSV/PDF)
-- Scheduled email report delivery
-- Advanced charts (time range selector)
-- Production WSGI/ASGI deployment and reverse proxy hardening
-
----
-
-## 16. Support Handover Checklist
-
-Before handover to end customer:
-- [ ] Verify PLC connection from deployment machine
-- [ ] Change default admin credentials
-- [ ] Validate inward/outward cycle on test trays
-- [ ] Validate all 7 report downloads
-- [ ] Verify desktop launcher and browser startup
-- [ ] Train operators on safety SOP
-- [ ] Provide DB backup/restore SOP
-
----
-
-## 17. Contact and Change Control
-Maintain a change log for:
-- PLC mapping changes
-- Endpoint/DB schema updates
-- Report format updates
-- Operator SOP revisions
-
-Store release notes per deployed version for traceability.
+This helps fast root-cause analysis.
