@@ -5,7 +5,7 @@
 <script src="/static/app.js"></script>
 </head>
 
-<body onload="loadGrid()">
+<body onload="initDashboard()">
 
 <!-- LOGO -->
 <img src="/static/img.png" class="logo">
@@ -21,6 +21,8 @@
 
     <!-- RIGHT CONTROLS -->
     <div class="right-controls">
+        <div id="plc-status" class="plc-status plc-unknown">PLC: CHECKING...</div>
+        <button class="reports-btn" onclick="openReports()">REPORTS</button>
 
         <!-- LOGOUT -->
         <button class="logout-btn" onclick="logout()">LOGOUT</button>
@@ -60,14 +62,24 @@
 
     <h3>OPERATION</h3>
     <div id="sel">Select a location</div>
+    <div id="op-msg"></div>
 
     <div class="form">
         <input id="item" placeholder="Item ID">
         <input id="desc" placeholder="Description">
     </div>
 
-    <button class="btn green" onclick="inward()">RUN INWARD</button>
-    <button class="btn red" onclick="outward()">RUN OUTWARD</button>
+    <div class="material-wrap">
+        <div class="material-title">Quick Material Type</div>
+        <div class="material-types">
+            <button id="type-a" class="type-btn" onclick="setMaterialType('TYPE_A')">Type A</button>
+            <button id="type-b" class="type-btn" onclick="setMaterialType('TYPE_B')">Type B</button>
+            <button id="type-c" class="type-btn" onclick="setMaterialType('TYPE_C')">Type C</button>
+        </div>
+    </div>
+
+    <button id="inward-btn" class="btn green" onclick="inward()">RUN INWARD</button>
+    <button id="outward-btn" class="btn red" onclick="outward()">RUN OUTWARD</button>
 
 </div>
 

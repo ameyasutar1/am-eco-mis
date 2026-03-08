@@ -1,6 +1,7 @@
 import time
 import logging
 import struct
+import socket
 import snap7
 from snap7.util import get_bool
 
@@ -12,6 +13,7 @@ WRITE_DB = 5
 RACK = 0
 SLOT = 1
 PORT = 102
+CONNECT_TIMEOUT = 3.0
 
 CYCLE_TIMEOUT = 300
 POLL_DELAY = 0.5
@@ -116,9 +118,27 @@ class PLCConnection:
 # =========================================================
 
 def connect_plc():
+    # Fail fast if PLC TCP endpoint is not reachable.
+    try:
+        with socket.create_connection((IP, PORT), timeout=CONNECT_TIMEOUT):
+            pass
+    except OSError as e:
+        raise ConnectionError(
+            f"PLC {IP}:{PORT} unreachable (timeout {CONNECT_TIMEOUT}s): {e}"
+        )
+
     plc = PLCConnection(IP, RACK, SLOT, READ_DB, WRITE_DB, PORT)
     plc.connect()
     return plc
+
+
+def probe_plc_connection(timeout=1.5):
+    try:
+        with socket.create_connection((IP, PORT), timeout=timeout):
+            pass
+        return True, f"PLC reachable at {IP}:{PORT}"
+    except OSError as e:
+        return False, f"PLC unreachable at {IP}:{PORT}: {e}"
 
 
 def pulse(plc, offset):
