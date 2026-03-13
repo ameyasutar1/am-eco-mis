@@ -218,7 +218,7 @@ def inward_cycle(station_id, bin_id):
         plc.write_bool(WriteBits.SET_LOC_FOR_LOAD, True)
 
         wait_for_bit(plc, ReadBits.LOCATION_SET_COMPLETED, "LOCATION_SET_COMPLETED")
-
+        plc.write_bool(WriteBits.SET_LOC_FOR_LOAD, False)
         plc.write_bool(WriteBits.LOAD_RECORDED, False)
         plc.write_bool(WriteBits.UNLOAD_RECORDED, False)
 
@@ -262,7 +262,7 @@ def outward_cycle(pickup_bin, drop_station):
         plc.write_bool(WriteBits.SET_LOC_FOR_UNLOAD, True)
 
         wait_for_bit(plc, ReadBits.LOCATION_SET_COMPLETED, "LOCATION_SET_COMPLETED")
-
+        plc.write_bool(WriteBits.SET_LOC_FOR_UNLOAD, False)
         plc.write_bool(WriteBits.LOAD_RECORDED, False)
         plc.write_bool(WriteBits.UNLOAD_RECORDED, False)
 
