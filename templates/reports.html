@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="/static/style.css">
+<script src="/static/reports.js"></script>
+</head>
+<body onload="initReportsPage()">
+
+<img src="/static/img.png" class="logo">
+
+<div class="reports-shell">
+    <div class="reports-head">
+        <h2>Reports & Analytics</h2>
+        <div class="reports-actions">
+            <button class="reports-btn" onclick="goDashboard()">DASHBOARD</button>
+            <button class="logout-btn" onclick="logout()">LOGOUT</button>
+        </div>
+    </div>
+
+    <div class="summary-grid">
+        <div class="summary-card"><span>Total Locations</span><b id="sum-total">-</b></div>
+        <div class="summary-card"><span>Filled Trays</span><b id="sum-filled">-</b></div>
+        <div class="summary-card"><span>Empty Trays</span><b id="sum-empty">-</b></div>
+        <div class="summary-card"><span>Total Users</span><b id="sum-users">-</b></div>
+        <div class="summary-card"><span>Stored Count</span><b id="sum-stored">-</b></div>
+        <div class="summary-card"><span>Issued Count</span><b id="sum-issued">-</b></div>
+    </div>
+
+    <div class="charts-grid">
+        <div class="chart-card">
+            <h3>Tray Fill Ratio</h3>
+            <div class="ratio-bar">
+                <div id="ratio-filled" class="ratio-filled" style="width:0%"></div>
+                <div id="ratio-empty" class="ratio-empty" style="width:0%"></div>
+            </div>
+            <div id="ratio-legend" class="chart-legend">-</div>
+        </div>
+
+        <div class="chart-card">
+            <h3>Side Utilization</h3>
+            <div id="side-chart" class="stack-chart"></div>
+        </div>
+
+        <div class="chart-card">
+            <h3>Material Distribution</h3>
+            <div id="material-chart" class="bar-chart"></div>
+        </div>
+
+        <div class="chart-card">
+            <h3>7-Day Movement Trend</h3>
+            <div id="trend-chart" class="trend-chart"></div>
+        </div>
+    </div>
+
+    <div class="reports-grid">
+        <div class="report-card">
+            <h3>6.1 Full Inventory Data</h3>
+            <p>Current storage data for all locations.</p>
+            <button class="btn green" onclick="downloadReport('/api/reports/full-inventory.pdf')">Download PDF</button>
+        </div>
+
+        <div class="report-card">
+            <h3>6.2 Item Wise</h3>
+            <p>Filter by item id or description.</p>
+            <input id="item-query" placeholder="Item ID / description">
+            <button class="btn green" onclick="downloadItemWise()">Download PDF</button>
+        </div>
+
+        <div class="report-card">
+            <h3>6.3 Location Wise</h3>
+            <p>Current data + movement history for a location.</p>
+            <input id="loc-query" placeholder="Location ID" type="number" min="1">
+            <button class="btn green" onclick="downloadLocationWise()">Download PDF</button>
+        </div>
+
+        <div class="report-card">
+            <h3>6.4 User Wise</h3>
+            <p>Action history by operator username.</p>
+            <input id="user-query" placeholder="Username">
+            <button class="btn green" onclick="downloadUserWise()">Download PDF</button>
+        </div>
+
+        <div class="report-card">
+            <h3>6.5 Storing History</h3>
+            <p>Inward transaction history.</p>
+            <button class="btn green" onclick="downloadReport('/api/reports/storing-history.pdf')">Download PDF</button>
+        </div>
+
+        <div class="report-card">
+            <h3>6.6 Issuing Report</h3>
+            <p>Outward transaction history.</p>
+            <button class="btn green" onclick="downloadReport('/api/reports/issuing-report.pdf')">Download PDF</button>
+        </div>
+
+        <div class="report-card">
+            <h3>6.7 Tray Status</h3>
+            <p>Empty vs filled tray report.</p>
+            <button class="btn green" onclick="downloadReport('/api/reports/tray-status.pdf')">Download PDF</button>
+        </div>
+    </div>
+
+    <div id="reports-msg" class="reports-msg"></div>
+</div>
+
+</body>
+</html>
