@@ -169,6 +169,10 @@ function goDashboard(){
     window.location.href = "/dashboard";
 }
 
+function goManualEntry(){
+    window.location.href = "/manual-entry";
+}
+
 function logout(){
     fetch("/logout")
     .then(()=>window.location.href="/");

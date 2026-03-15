@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="/static/style.css">
+<script src="/static/manual.js?v=20260315a"></script>
+</head>
+
+<body onload="initManualPage()">
+
+<img src="/static/img.png" class="logo">
+
+<div class="top-bar">
+    <div class="search-box">
+        <input id="manual-search" placeholder="Search location / item">
+        <span onclick="doManualSearch()">🔍</span>
+    </div>
+
+    <div class="right-controls">
+        <div id="manual-cycle-status" class="plc-status plc-unknown">CYCLE: CHECKING...</div>
+        <button class="reports-btn" onclick="goDashboard()">DASHBOARD</button>
+        <button class="reports-btn" onclick="goReports()">REPORTS</button>
+        <button class="logout-btn" onclick="logout()">LOGOUT</button>
+
+        <div class="page-nav">
+            <span>Page</span>
+            <b id="manual-row">1</b>
+            <div class="nav-btns">
+                <button onclick="prevManual()">⬅</button>
+                <button onclick="nextManual()">➡</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="main">
+    <div class="rack">
+        <h3>Left Side</h3>
+        <div id="manual-left" class="seat-grid"></div>
+    </div>
+
+    <div class="rack">
+        <h3>Right Side</h3>
+        <div id="manual-right" class="seat-grid"></div>
+    </div>
+</div>
+
+<div class="operation">
+    <h3>MANUAL ENTRY</h3>
+    <div id="manual-sel">Select a location</div>
+    <div id="manual-msg"></div>
+
+    <div class="form">
+        <input id="manual-item" placeholder="Item ID">
+        <input id="manual-desc" placeholder="Description">
+    </div>
+
+    <button id="manual-add-btn" class="btn green" onclick="manualAdd()">MANUALLY ADD</button>
+    <button id="manual-remove-btn" class="btn red" onclick="manualRemove()">MANUALLY REMOVE</button>
+</div>
+
+</body>
+</html>

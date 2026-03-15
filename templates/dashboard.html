@@ -2,7 +2,7 @@
 <html>
 <head>
 <link rel="stylesheet" href="/static/style.css">
-<script src="/static/app.js"></script>
+<script src="/static/app.js?v=20260315a"></script>
 </head>
 
 <body onload="initDashboard()">
@@ -23,6 +23,7 @@
     <div class="right-controls">
         <div id="plc-status" class="plc-status plc-unknown">PLC: CHECKING...</div>
         <button class="reports-btn" onclick="openReports()">REPORTS</button>
+        <button class="reports-btn" onclick="window.location.href='/manual-entry'">MANUAL ENTRY</button>
 
         <!-- LOGOUT -->
         <button class="logout-btn" onclick="logout()">LOGOUT</button>

@@ -2,7 +2,7 @@
 <html>
 <head>
 <link rel="stylesheet" href="/static/style.css">
-<script src="/static/reports.js"></script>
+<script src="/static/reports.js?v=20260315a"></script>
 </head>
 <body onload="initReportsPage()">
 
@@ -13,6 +13,7 @@
         <h2>Reports & Analytics</h2>
         <div class="reports-actions">
             <button class="reports-btn" onclick="goDashboard()">DASHBOARD</button>
+            <button class="reports-btn" onclick="window.location.href='/manual-entry'">MANUAL ENTRY</button>
             <button class="logout-btn" onclick="logout()">LOGOUT</button>
         </div>
     </div>
@@ -82,13 +83,13 @@
 
         <div class="report-card">
             <h3>6.5 Storing History</h3>
-            <p>Inward transaction history.</p>
+            <p>Inward + manual add transaction history.</p>
             <button class="btn green" onclick="downloadReport('/api/reports/storing-history.pdf')">Download PDF</button>
         </div>
 
         <div class="report-card">
             <h3>6.6 Issuing Report</h3>
-            <p>Outward transaction history.</p>
+            <p>Outward + manual remove transaction history.</p>
             <button class="btn green" onclick="downloadReport('/api/reports/issuing-report.pdf')">Download PDF</button>
         </div>
 
@@ -96,6 +97,12 @@
             <h3>6.7 Tray Status</h3>
             <p>Empty vs filled tray report.</p>
             <button class="btn green" onclick="downloadReport('/api/reports/tray-status.pdf')">Download PDF</button>
+        </div>
+
+        <div class="report-card">
+            <h3>6.8 Manual Activity</h3>
+            <p>Who manually added or removed data.</p>
+            <button class="btn green" onclick="downloadReport('/api/reports/manual-activity.pdf')">Download PDF</button>
         </div>
     </div>
 

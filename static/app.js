@@ -408,3 +408,7 @@ function logout(){
 function openReports(){
     window.location.href = "/reports";
 }
+
+function openManualEntry(){
+    window.location.href = "/manual-entry";
+}

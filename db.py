@@ -209,13 +209,13 @@ def report_summary():
 
     cur.execute("""
     SELECT COUNT(*) FROM movement_logs
-    WHERE action='INWARD' AND status='SUCCESS'
+    WHERE action IN ('INWARD', 'MANUAL_ADD') AND status='SUCCESS'
     """)
     inward_ok = cur.fetchone()[0]
 
     cur.execute("""
     SELECT COUNT(*) FROM movement_logs
-    WHERE action='OUTWARD' AND status='SUCCESS'
+    WHERE action IN ('OUTWARD', 'MANUAL_REMOVE') AND status='SUCCESS'
     """)
     outward_ok = cur.fetchone()[0]
 
@@ -305,9 +305,9 @@ def get_storing_history():
     c=conn()
     cur=c.cursor()
     cur.execute("""
-    SELECT location_id, item_id, description, material_type, username, status, created_at
+    SELECT action, location_id, item_id, description, material_type, username, status, created_at
     FROM movement_logs
-    WHERE action='INWARD'
+    WHERE action IN ('INWARD', 'MANUAL_ADD')
     ORDER BY id DESC
     """)
     rows=cur.fetchall()
@@ -319,9 +319,23 @@ def get_issuing_history():
     c=conn()
     cur=c.cursor()
     cur.execute("""
-    SELECT location_id, item_id, description, material_type, username, status, created_at
+    SELECT action, location_id, item_id, description, material_type, username, status, created_at
     FROM movement_logs
-    WHERE action='OUTWARD'
+    WHERE action IN ('OUTWARD', 'MANUAL_REMOVE')
+    ORDER BY id DESC
+    """)
+    rows=cur.fetchall()
+    c.close()
+    return rows
+
+
+def get_manual_history():
+    c=conn()
+    cur=c.cursor()
+    cur.execute("""
+    SELECT action, location_id, item_id, description, username, status, created_at
+    FROM movement_logs
+    WHERE action IN ('MANUAL_ADD', 'MANUAL_REMOVE')
     ORDER BY id DESC
     """)
     rows=cur.fetchall()
@@ -374,7 +388,7 @@ def get_reports_chart_data():
     cur.execute("""
     SELECT COALESCE(material_type, 'UNKNOWN') as material_type, COUNT(*) as cnt
     FROM movement_logs
-    WHERE action='INWARD' AND status='SUCCESS'
+    WHERE action IN ('INWARD', 'MANUAL_ADD') AND status='SUCCESS'
     GROUP BY COALESCE(material_type, 'UNKNOWN')
     ORDER BY cnt DESC
     """)
@@ -382,8 +396,8 @@ def get_reports_chart_data():
 
     cur.execute("""
     SELECT substr(created_at,1,10) as d,
-           SUM(CASE WHEN action='INWARD' AND status='SUCCESS' THEN 1 ELSE 0 END) as inward_cnt,
-           SUM(CASE WHEN action='OUTWARD' AND status='SUCCESS' THEN 1 ELSE 0 END) as outward_cnt
+           SUM(CASE WHEN action IN ('INWARD', 'MANUAL_ADD') AND status='SUCCESS' THEN 1 ELSE 0 END) as inward_cnt,
+           SUM(CASE WHEN action IN ('OUTWARD', 'MANUAL_REMOVE') AND status='SUCCESS' THEN 1 ELSE 0 END) as outward_cnt
     FROM movement_logs
     GROUP BY substr(created_at,1,10)
     ORDER BY d DESC

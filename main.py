@@ -217,6 +217,13 @@ def reports_page(req: Request):
     return templates.TemplateResponse("reports.html", {"request": req})
 
 
+@app.get("/manual-entry")
+def manual_entry_page(req: Request):
+    if not req.session.get("user"):
+        return RedirectResponse("/", status_code=302)
+    return templates.TemplateResponse("manual_entry.html", {"request": req})
+
+
 # =========================================================
 # API
 # =========================================================
@@ -326,6 +333,175 @@ def outward_api(req: Request, loc: int = Form(...)):
         return {"status": "error", "msg": str(e)}
 
 
+@app.post("/api/manual/add")
+def manual_add_api(
+    req: Request,
+    loc: int = Form(...),
+    item: str | None = Form(None),
+    desc: str | None = Form(None)
+):
+    user = req.session.get("user")
+    if not user:
+        return {"status": "error", "msg": "Session expired. Please login again"}
+
+    clean_item = (item or "").strip()
+    clean_desc = (desc or "").strip()
+    if not clean_item or not clean_desc:
+        return {"status": "error", "msg": "Item ID and Description are required"}
+
+    try:
+        with op_lock:
+            current = find_loc(loc)
+            if not current:
+                log_movement(
+                    action="MANUAL_ADD",
+                    location_id=loc,
+                    item_id=clean_item,
+                    description=clean_desc,
+                    material_type=None,
+                    username=user,
+                    status="FAILED",
+                    error_msg=f"Location {loc} not found"
+                )
+                return {"status": "error", "msg": f"Location {loc} not found"}
+
+            if operation_state["running"] and operation_state["loc"] == loc:
+                log_movement(
+                    action="MANUAL_ADD",
+                    location_id=loc,
+                    item_id=clean_item,
+                    description=clean_desc,
+                    material_type=None,
+                    username=user,
+                    status="FAILED",
+                    error_msg=f"Cycle in progress at location {loc}"
+                )
+                return {
+                    "status": "error",
+                    "msg": f"Cycle is running at location {loc}. Manual add blocked",
+                }
+
+            if current[2] is not None:
+                log_movement(
+                    action="MANUAL_ADD",
+                    location_id=loc,
+                    item_id=clean_item,
+                    description=clean_desc,
+                    material_type=None,
+                    username=user,
+                    status="FAILED",
+                    error_msg=f"Location {loc} already occupied"
+                )
+                return {"status": "error", "msg": f"Location {loc} is already occupied"}
+
+            update_store(loc, clean_item, clean_desc)
+
+        log_movement(
+            action="MANUAL_ADD",
+            location_id=loc,
+            item_id=clean_item,
+            description=clean_desc,
+            material_type=None,
+            username=user,
+            status="SUCCESS"
+        )
+        return {"status": "success", "msg": f"Manual add completed for location {loc}"}
+    except Exception as e:
+        log_movement(
+            action="MANUAL_ADD",
+            location_id=loc,
+            item_id=clean_item,
+            description=clean_desc,
+            material_type=None,
+            username=user,
+            status="FAILED",
+            error_msg=str(e)
+        )
+        return {"status": "error", "msg": str(e)}
+
+
+@app.post("/api/manual/remove")
+def manual_remove_api(req: Request, loc: int = Form(...)):
+    user = req.session.get("user")
+    if not user:
+        return {"status": "error", "msg": "Session expired. Please login again"}
+
+    removed_item = None
+    removed_desc = None
+
+    try:
+        with op_lock:
+            current = find_loc(loc)
+            if not current:
+                log_movement(
+                    action="MANUAL_REMOVE",
+                    location_id=loc,
+                    item_id=None,
+                    description=None,
+                    material_type=None,
+                    username=user,
+                    status="FAILED",
+                    error_msg=f"Location {loc} not found"
+                )
+                return {"status": "error", "msg": f"Location {loc} not found"}
+
+            if operation_state["running"] and operation_state["loc"] == loc:
+                log_movement(
+                    action="MANUAL_REMOVE",
+                    location_id=loc,
+                    item_id=current[2],
+                    description=current[3],
+                    material_type=None,
+                    username=user,
+                    status="FAILED",
+                    error_msg=f"Cycle in progress at location {loc}"
+                )
+                return {
+                    "status": "error",
+                    "msg": f"Cycle is running at location {loc}. Manual remove blocked",
+                }
+
+            if current[2] is None:
+                log_movement(
+                    action="MANUAL_REMOVE",
+                    location_id=loc,
+                    item_id=None,
+                    description=None,
+                    material_type=None,
+                    username=user,
+                    status="FAILED",
+                    error_msg=f"Location {loc} is already empty"
+                )
+                return {"status": "error", "msg": f"Location {loc} is already empty"}
+
+            removed_item = current[2]
+            removed_desc = current[3]
+            outward(loc)
+
+        log_movement(
+            action="MANUAL_REMOVE",
+            location_id=loc,
+            item_id=removed_item,
+            description=removed_desc,
+            material_type=None,
+            username=user,
+            status="SUCCESS"
+        )
+        return {"status": "success", "msg": f"Manual remove completed for location {loc}"}
+    except Exception as e:
+        log_movement(
+            action="MANUAL_REMOVE",
+            location_id=loc,
+            item_id=removed_item,
+            description=removed_desc,
+            material_type=None,
+            username=user,
+            status="FAILED",
+            error_msg=str(e)
+        )
+        return {"status": "error", "msg": str(e)}
+
+
 @app.get("/api/op-status")
 def op_status():
     with op_lock:
@@ -422,11 +598,11 @@ def report_user_wise(user: str):
 @app.get("/api/reports/storing-history.pdf")
 def report_storing_history():
     rows = get_storing_history()
-    lines = ["Section: Inward Storing History", ""]
+    lines = ["Section: Inward + Manual Add History", ""]
     lines += _table(
-        ["Timestamp", "Loc", "Item ID", "Type", "User", "Status"],
-        [[r[6], r[0], r[1] or "-", r[3] or "-", r[4] or "-", r[5]] for r in rows],
-        [20, 5, 28, 12, 18, 8]
+        ["Timestamp", "Action", "Loc", "Item ID", "Type", "User", "Status"],
+        [[r[7], r[0], r[1], r[2] or "-", r[4] or "-", r[5] or "-", r[6]] for r in rows],
+        [20, 12, 5, 24, 12, 16, 8]
     )
     return _pdf_download("storing_history_report.pdf", "Storing History Report", lines)
 
@@ -434,13 +610,25 @@ def report_storing_history():
 @app.get("/api/reports/issuing-report.pdf")
 def report_issuing():
     rows = get_issuing_history()
-    lines = ["Section: Outward Issuing History", ""]
+    lines = ["Section: Outward + Manual Remove History", ""]
     lines += _table(
-        ["Timestamp", "Loc", "Item ID", "User", "Status"],
-        [[r[6], r[0], r[1] or "-", r[4] or "-", r[5]] for r in rows],
-        [20, 5, 38, 20, 8]
+        ["Timestamp", "Action", "Loc", "Item ID", "User", "Status"],
+        [[r[7], r[0], r[1], r[2] or "-", r[5] or "-", r[6]] for r in rows],
+        [20, 14, 5, 34, 18, 8]
     )
     return _pdf_download("issuing_report.pdf", "Issuing Report", lines)
+
+
+@app.get("/api/reports/manual-activity.pdf")
+def report_manual_activity():
+    rows = get_manual_history()
+    lines = ["Section: Manual Add/Remove Activity", ""]
+    lines += _table(
+        ["Timestamp", "Action", "Loc", "Item ID", "User", "Status"],
+        [[r[6], r[0], r[1], r[2] or "-", r[4] or "-", r[5]] for r in rows],
+        [20, 14, 5, 34, 18, 8]
+    )
+    return _pdf_download("manual_activity_report.pdf", "Manual Activity Report", lines)
 
 
 @app.get("/api/reports/tray-status.pdf")
