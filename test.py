@@ -188,8 +188,15 @@ def check_stacker_health(plc):
     emg = plc.read_bool(ReadBits.EMG_HEALTHY)
     auto = plc.read_bool(ReadBits.AUTO_MODE)
 
+    if emg:
+        raise Exception("EMERGENCY STOP ENGAGED - CANNOT PROCEED")
+    
+    if not auto:
+        raise Exception("STACKER NOT IN AUTO MODE - CANNOT PROCEED")
+    
     logging.info(f"EMG_HEALTHY={emg}")
     logging.info(f"AUTO_MODE={auto}")
+    return True
 
 
 # =========================================================
@@ -204,7 +211,8 @@ def inward_cycle(station_id, bin_id):
 
     try:
 
-        check_stacker_health(plc)
+        if not check_stacker_health(plc):
+            raise Exception("Stacker not healthy - cannot proceed with cycle")
 
         # handshake start
         plc.write_bool(WriteBits.LOAD_RECORDED, True)
@@ -248,7 +256,8 @@ def outward_cycle(pickup_bin, drop_station):
 
     try:
 
-        check_stacker_health(plc)
+        if not check_stacker_health(plc):
+            raise Exception("Stacker not healthy - cannot proceed with cycle")
 
         # handshake start
         plc.write_bool(WriteBits.LOAD_RECORDED, True)

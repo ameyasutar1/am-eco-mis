@@ -3,3 +3,13 @@ __pycache__/
 *.pyc
 .venv/
 *.db
+.vscode/
+.idea/
+*.log
+*.env
+*.bak
+*.tmp
+*.swp
+*.swo
+*.zip
+*.tar.gz
